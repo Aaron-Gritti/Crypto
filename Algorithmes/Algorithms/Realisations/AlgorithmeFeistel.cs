@@ -1,5 +1,6 @@
 ﻿using CryptoClient.Algorithmes.Algorithms;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CryptoClient.Algorithmes.Algorithms.Realisations
@@ -10,7 +11,7 @@ namespace CryptoClient.Algorithmes.Algorithms.Realisations
 
         public AlgorithmFeistel()
         {
-            sbox = ChargerSbox("Sbox.txt");
+            //sbox = ChargerSbox("Sbox.txt");
         }
 
         public string Chiffrer(string message, string cle)
@@ -43,9 +44,14 @@ namespace CryptoClient.Algorithmes.Algorithms.Realisations
             throw new NotImplementedException();
         }
 
-        private string EBox(string input)
+        public string EBox(string input)
         {
-            throw new NotImplementedException();
+            string eBoxed = input;
+            for (int i = 0; i< input.Length; i+=3)
+            {         
+                eBoxed.Insert(i, (input[i].ToString()));
+            }
+            return eBoxed;
         }
 
         private string Add32(string a, string b)
