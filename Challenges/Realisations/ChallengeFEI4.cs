@@ -19,18 +19,18 @@ namespace CryptoClient.Challenges.Realisations
             while (true)
             {
                 string cle = Connexion.RecevoirMessage(); // On récupère la clé
-                Console.WriteLine(cle);
+                Console.WriteLine("Cle reçue : " + cle);
                 if (cle == "END") { break; } // Challenge terminé 
 
                 string tour = Connexion.RecevoirMessage();// On récupère le numéro de tour
-                Console.WriteLine(tour);
+                Console.WriteLine("Tour reçu : "+tour);
 
                 string image = algorithme.ClePartielle(cle, int.Parse(tour));
-                Console.WriteLine(image);  
+                Console.WriteLine("Cle partielle: "+image);  
                 Connexion.EnvoyerMessage(image.ToString());
 
                 string verdict = Connexion.RecevoirMessage(); // On regarde les résultats
-                Console.WriteLine(verdict +"\n");
+                Console.WriteLine("Verdict: " + verdict +"\n");
                 if (verdict == "Wrong!") { break; } // Challenge raté
             }
         }

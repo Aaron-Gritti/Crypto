@@ -145,10 +145,14 @@ namespace CryptoClient.Algorithmes.Algorithms.Realisations
 
         public string ClePartielle(string cle, int numTour)
         {
-            int rotationTour = numTour % 32;
-            string cleRotation = cle.Substring(rotationTour) + cle.Substring(0, rotationTour);
+            AlgorithmeVigenere vig = new AlgorithmeVigenere();
+            AlgorithmeCesar ces = new AlgorithmeCesar();
+      
+            string cle1 = ces.Chiffrer(cle, numTour.ToString());
+       
+            string cle2 = vig.Chiffrer(cle, cle1);
 
-            return cleRotation;
+            return cle2;
         }
 
         private string TourDechiffrement(string message, string cle, int numTour)
