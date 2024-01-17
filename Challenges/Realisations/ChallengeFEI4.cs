@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CryptoClient.Challenges.Realisations
 {
-    public class ChallengeFEI3 : IChallenge
+    public class ChallengeFEI4 : IChallenge
     {
         public void Executer()
         {
@@ -18,11 +18,14 @@ namespace CryptoClient.Challenges.Realisations
 
             while (true)
             {
-                string message = Connexion.RecevoirMessage(); // On récupère le message
-                Console.WriteLine(message);
-                if (message == "END") { break; } // Challenge terminé 
+                string cle = Connexion.RecevoirMessage(); // On récupère la clé
+                Console.WriteLine(cle);
+                if (cle == "END") { break; } // Challenge terminé 
 
-                string image = algorithme.EBox(message);
+                string tour = Connexion.RecevoirMessage();// On récupère le numéro de tour
+                Console.WriteLine(tour);
+
+                string image = algorithme.ClePartielle(cle, int.Parse(tour));
                 Console.WriteLine(image);  
                 Connexion.EnvoyerMessage(image.ToString());
 

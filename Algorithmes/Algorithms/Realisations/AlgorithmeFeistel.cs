@@ -1,19 +1,15 @@
-﻿using CryptoClient.Algorithmes.Algorithms;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CryptoClient.Algorithmes.Algorithms.Realisations
 {
     public class AlgorithmFeistel : IAlgorithm
     {
-        private readonly string[] sbox;
-
-        public AlgorithmFeistel()
-        {
-            //sbox = ChargerSbox("Sbox.txt");
-        }
+        private string[] sbox;
 
         public string Chiffrer(string message, string cle)
         {
@@ -25,98 +21,146 @@ namespace CryptoClient.Algorithmes.Algorithms.Realisations
             throw new NotImplementedException();
         }
 
-        private string[] ChargerSbox(string fichierSbox)
+        public AlgorithmFeistel()
         {
-            throw new NotImplementedException();
+            sbox = new string[256];
+
+            using (StreamReader fichier = File.OpenText("Resources\\sbox.txt"))
+            {
+                string ligne;
+                int i = 0;
+                while ((ligne = fichier.ReadLine()) != null)
+                {
+                    string[] ligneS = ligne.Split(",");
+
+                    foreach (string partie in ligneS)
+                    {
+                        if (partie != "")
+                        {
+                            sbox[i] = HexToBin32(partie);
+                            i++;
+                        }
+                    }
+                }
+            }
         }
 
         private string HexToBin32(string hex)
         {
-            byte[] bytes = Enumerable.Range(0, hex.Length / 2).Select(i => Convert.ToByte(hex.Substring(2 * i, 2), 16)).ToArray();
+            string bin = Convert.ToString(Convert.ToInt64(hex, 16), 2);
 
-            string bin = "";
-            for (int i = 0; i < bytes.Length; i++)
+            return bin.PadLeft(32, '0');
+        }
+
+        public string PBox(string message)
+        {
+            string renvoi = "";
+            renvoi += message[16 - 1];
+            renvoi += message[7 - 1];
+            renvoi += message[20 - 1];
+            renvoi += message[21 - 1];
+            renvoi += message[29 - 1];
+            renvoi += message[12 - 1];
+            renvoi += message[28 - 1];
+            renvoi += message[17 - 1];
+            renvoi += message[1 - 1];
+            renvoi += message[15 - 1];
+            renvoi += message[23 - 1];
+            renvoi += message[26 - 1];
+            renvoi += message[5 - 1];
+            renvoi += message[18 - 1];
+            renvoi += message[31 - 1];
+            renvoi += message[10 - 1];
+            renvoi += message[2 - 1];
+            renvoi += message[8 - 1];
+            renvoi += message[24 - 1];
+            renvoi += message[14 - 1];
+            renvoi += message[32 - 1];
+            renvoi += message[27 - 1];
+            renvoi += message[3 - 1];
+            renvoi += message[9 - 1];
+            renvoi += message[19 - 1];
+            renvoi += message[13 - 1];
+            renvoi += message[30 - 1];
+            renvoi += message[6 - 1];
+            renvoi += message[22 - 1];
+            renvoi += message[11 - 1];
+            renvoi += message[4 - 1];
+            renvoi += message[25 - 1];
+
+            return renvoi;
+        }
+
+        public string SBox(string message)
+        {
+            int entier = Convert.ToInt32(message, 2);
+            return this.sbox[entier];
+        }
+
+        public string EBox(string message)
+        {
+            string renvoi = "";
+
+            int pos = 0;
+            for (int i = 0; i < message.Length; i++)
             {
-                string byteBinary = Convert.ToString(bytes[i], 2).PadLeft(8, '0');
-                bin += byteBinary;
+                renvoi += message[pos];
+                if (pos % 3 == 0)
+                {
+                    renvoi += message[pos];
+                }
+                pos++;
             }
-
-            return bin;
+            return renvoi;
         }
 
-        public string PBox(string input)
+        private string Add32(string nb1, string nb2)
         {
-            int[] pboxPermutation = { 9, 17, 23, 31, 13, 28, 2, 18, 24, 16, 30, 6, 26, 20, 10, 1, 8, 14, 25, 3, 4, 29, 11, 19, 32, 12, 22, 7, 5, 27, 15, 21 };
+            long number1 = Convert.ToInt64(nb1, 2);
+            long number2 = Convert.ToInt64(nb2, 2);
 
-            char[] output = new char[32];
+            long renvoi = (number1 + number2) % (long)Math.Pow(2, 32);
 
-            for (int i = 0; i < 32; i++)
-            {
-                output[i] = input[pboxPermutation[i] - 1];
-            }
+            string bin = Convert.ToString(renvoi, 2);
 
-            return new string(output);
+            return bin.PadLeft(32, '0');
         }
 
-        private string SBox(string input)
+        public string F(string message, string cle)
         {
-            throw new NotImplementedException();
+            AlgorithmTransposition algoTranspiDuBibi = new AlgorithmTransposition();
+
+            string transpi = algoTranspiDuBibi.Chiffrer(message, cle);
+
+            string sBox = transpi.Substring(0, 8);
+            string eBox = transpi.Substring(8, 24);
+
+            string outSBox = SBox(sBox);
+            string outEBox = EBox(eBox);
+
+            string add32 = Add32(outEBox, outSBox);
+
+            return PBox(add32);
         }
 
-        public string EBox(string input)
+        public string ClePartielle(string cle, int numTour)
         {
-            string eBoxed = input;
-            for (int i = 0; i< input.Length; i+=3)
-            {         
-                eBoxed.Insert(i, (input[i].ToString()));
-            }
-            return eBoxed;
+            int rotationTour = numTour % 32;
+            string cleRotation = cle.Substring(rotationTour) + cle.Substring(0, rotationTour);
+
+            return cleRotation;
         }
 
-        private string Add32(string a, string b)
+        private string TourDechiffrement(string message, string cle, int numTour)
         {
-            // Convertit les chaînes binaires en tableaux de bits
-            bool[] aBits = new bool[32];
-            bool[] bBits = new bool[32];
+            string leftHalf = message.Substring(0, message.Length / 2);
+            string rightHalf = message.Substring(message.Length / 2);
 
-            for (int i = 0; i < 32; i++)
-            {
-                aBits[i] = (a[31 - i] == '1');
-                bBits[i] = (b[31 - i] == '1');
-            }
+            string newRightHalf = Add32(leftHalf, F(rightHalf, ClePartielle(cle, numTour)));
+            string newLeftHalf = rightHalf;
 
-            // Effectue l'addition modulo 2 de a et b
-            bool[] resBits = new bool[32];
-            for (int i = 0; i < 32; i++)
-            {
-                resBits[i] = aBits[i] ^ bBits[i];
-            }
-
-            // Convertit le résultat en chaîne binaire
-            string res = "";
-            for (int i = 31; i >= 0; i--)
-            {
-                res += (resBits[i] ? '1' : '0');
-            }
-
-            return res;
+            return newLeftHalf + newRightHalf;
         }
 
-
-        private string F(string m1, string ki)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string ClePartielle(string cle, int tour)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string TourDechiffrement(string message, string k1, string k2)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
-

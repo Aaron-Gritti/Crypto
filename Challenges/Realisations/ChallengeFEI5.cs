@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CryptoClient.Challenges.Realisations
 {
-    public class ChallengeFEI3 : IChallenge
+    public class ChallengeFEI5 : IChallenge
     {
         public void Executer()
         {
@@ -22,9 +22,9 @@ namespace CryptoClient.Challenges.Realisations
                 Console.WriteLine(message);
                 if (message == "END") { break; } // Challenge terminé 
 
-                string image = algorithme.EBox(message);
-                Console.WriteLine(image);  
-                Connexion.EnvoyerMessage(image.ToString());
+                string messagechiffre = algorithme.EBox(message);
+                Console.WriteLine(messagechiffre);  
+                Connexion.EnvoyerMessage(messagechiffre.ToString());
 
                 string verdict = Connexion.RecevoirMessage(); // On regarde les résultats
                 Console.WriteLine(verdict +"\n");

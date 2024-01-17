@@ -21,8 +21,12 @@ namespace CryptoClient.Challenges
             else if (code == "XOR1") { return new ChallengeXOR1(); }
             else if (code == "XOR2") { return new ChallengeXOR2(); }
             else if (code == "XOR3") { return new ChallengeXOR3(); }
-            else if (code == "FEISTEL1") { return new ChallengeFEISTEL1(); }
+            else if (code == "FEISTEL1") { return new ChallengeFEI1(); }
+            else if (code == "FEISTEL2") { return new ChallengeFEI2(); }
             else if (code == "FEISTEL3") { return new ChallengeFEI3(); }
+            else if (code == "FEISTEL4") { return new ChallengeFEI4(); }
+            else if (code == "FEISTEL5") { return new ChallengeFEI5(); }
+            else if (code == "FEISTEL6") { return new ChallengeFEI6(); }
             return null;
         }
     }
